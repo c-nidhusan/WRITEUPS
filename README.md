@@ -21,4 +21,4 @@ All writeups are for educational purposes. I do not publish findings from in-sco
 
 ## 🔗 Links
 
-- TryHackMe profile: _coming soon_
+- TryHackMe profile: Sanijdhu
