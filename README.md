@@ -7,22 +7,9 @@ I'm a cybersecurity junior training on [TryHackMe](https://tryhackme.com) and wo
 ## 📁 Structure
 
 - **[practice/](practice/)** — CTF and lab writeups. TryHackMe rooms, HackTheBox, home lab.
-  Each machine gets its own folder with the plan I wrote *before* starting, the journal from
-  during, the clean writeup, and a debrief.
+  One markdown file per machine.
 - **[bugbounties/](bugbounties/)** — real-world program work. Nothing lands here without
   written authorisation from the program.
-
-## 🎯 Method
-
-Every practice machine runs the same way:
-
-1. **Plan** — full methodology written from memory before deploying
-2. **Run** — blind, no notes, no walkthroughs
-3. **Journal** — commands, output, dead ends, in real time
-4. **Debrief** — notes opened only at the end, to find the gap
-
-The interesting artefact isn't the writeup. It's the difference between the plan and what
-actually happened.
 
 ## 🚧 Status
 
