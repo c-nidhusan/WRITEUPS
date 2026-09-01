@@ -6,4 +6,4 @@ One markdown file per machine, named after the room.
 
 | Machine | Platform | Outcome |
 |---|---|---|
-| _none yet_ | | |
+| [Kenobi](kenobi.md) | TryHackMe | root |
