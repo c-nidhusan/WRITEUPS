@@ -72,15 +72,19 @@ username `anonymous`, password `anonymous`. **The cheapest door gets checked fir
   ever got a fair shot. Lesson: when you see FTP, the anonymous check is 30 seconds — do it first.
 - Read the **default** Ubuntu crontab as a privesc candidate. The eye for cron is "what here is
   not standard?" — nothing was.
-- Ran the less escape as one command line, without sudo: `less /etc/hosts!/bin/sh` → a jake
-  shell. Two errors in one line: the root power comes from `sudo`, and `!/bin/sh` is typed
-  *inside* the pager, not appended to the filename.
-- Skipped `sudo -l` on the first enumeration pass — it was the answer and it's the first thing
-  to run every time.
+- Pasted a pager escape before understanding it: `less /etc/hosts!/bin/sh` as one command line
+  → a jake shell. A copy-paste error — but the error exposed the mechanism: root power comes
+  from `sudo`, and `!/bin/sh` is typed *inside* the pager, not appended to a filename.
+  Rule: never paste a payload you can't explain line by line.
+- `sudo -l` ran during the manual pass but its output didn't register: the NOPASSWD entry WAS
+  the vulnerability, sitting in plain sight. Recognition rule: any NOPASSWD line in `sudo -l`
+  output is a gift — read every entry, every time.
 
 ## 5. Lessons
 
 1. Check the cheapest door first. Anonymous FTP takes 30 seconds; do it before any brute force.
-2. `sudo -l` is move one of Linux privesc. It wins more boxes than any exploit.
+2. `sudo -l` is move one of Linux privesc — and a NOPASSWD entry in its output is always a
+   vulnerability candidate.
 3. Escaped shells inherit the launcher's privileges: interactive program running as root
-   (less, nano, vim, man…) = root shell waiting to happen — GTFOBins is the lookup.
+   (less, nano, vim, man…) = root shell waiting to happen — GTFOBins is the lookup. And run the
+   payload you understand, not the one you copied.
