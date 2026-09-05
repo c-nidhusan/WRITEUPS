@@ -10,3 +10,4 @@ One markdown file per machine, named after the room.
 | [Basic Pentesting](basic-pentesting.md) | TryHackMe | root |
 | [Vulnversity](vulnversity.md) | TryHackMe | root |
 | [Brooklyn Nine Nine](brooklyn-nine-nine.md) | TryHackMe | root |
+| [Bounty Hacker](bounty-hacker.md) | TryHackMe | root |
