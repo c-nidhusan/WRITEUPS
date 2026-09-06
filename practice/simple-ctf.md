@@ -26,9 +26,9 @@ mitch/secret → ssh -p 2222 → `sudo -l` → `(root) NOPASSWD: /usr/bin/vim` �
 | 80 | Apache 2.4.18, default page | decoy front page | directory enumeration |
 | **2222** | OpenSSH 7.2p2 | **SSH on a non-standard port** | every SSH tool needs `-p 2222` / `ssh://IP:2222` |
 
-That last line cost twenty minutes later, because it was read once and then worked from memory.
-Room answers that fall straight out of this table: services under port 1000 = **2** (21, 80);
-the "higher port" = **SSH on 2222**.
+A non-standard SSH port is easy to default back to 22 out of habit — re-check it before every
+SSH-related tool. Room answers that fall straight out of this table: services under port 1000 =
+**2** (21, 80); the "higher port" = **SSH on 2222**.
 
 ## 2. Foothold (user)
 
@@ -80,19 +80,24 @@ the "higher port" = **SSH on 2222**.
 
 ## 4. Misses and dead ends
 
-- **Read-the-failure pattern, worst box yet:** misread the room question ("under port 1000" ≠
-  "port 1000") and burned two scans; brute-forced port 22 that my own scan said wasn't SSH;
-  flailed through `ssh -D/-L/-R` while ssh's usage output — which I printed — shows `-p port`;
-  used an IBM i support page to fix a Kali ftp client (`?Invalid command` × 6).
-- The FTP reference file that held every fix (passive, epsv, curl one-shot) had been deleted in a
-  vault merge the day before. Consolidating notes is fine; dropping the payload isn't.
-- GTFOBins navigation still shaky: sections are chosen by *how you got the binary* — sudo -l
-  named it → Sudo section → snippet that starts with `sudo`.
+A long day, and these were attention slips rather than missing knowledge — each one was already
+answerable from something on screen or in the notes:
+
+- Misread the room question: "services under port 1000" means ports *below* 1000, not port 1000.
+- Hydra aimed at port 22 while the scan output said SSH was on 2222. Worth remembering the error
+  class: a *timeout* is a connection problem (port/host), never a password problem.
+- Tried `ssh user@host:2222` and then `-D/-L/-R`; the right flag is `-p`, printed in ssh's own
+  usage output and already in my Linux Commands.md.
+- Used an IBM i support page to fix a Kali ftp client (`?Invalid command` × 6) — check what
+  platform a document is written for before applying it.
+- The FTP notes holding the passive/epsv/curl fixes had been dropped in a vault merge; restored.
+- GTFOBins: the section to read is chosen by how you got the binary — sudo -l named it →
+  Sudo section → the snippet already starts with `sudo`.
 
 ## 5. Lessons
 
-1. **Quote the fact before the tool call.** Port, path, username — from the scan output, not from
-   memory. One line in the journal: "scan said 2222, so the command gets 2222."
+1. **One quoted fact before each tool call.** Port, path, username — copied from the scan, e.g.
+   "scan said 2222 → command gets 2222." Cheap insurance against habit defaults.
 2. **Error classes:** timeout/refused = wrong port or dead host; "login failed" = wrong
    credentials. Never diagnose across categories.
 3. **FTP = control channel + data channel.** Login OK but listing hangs → data channel; passive
