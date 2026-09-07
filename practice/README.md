@@ -12,3 +12,4 @@ One markdown file per machine, named after the room.
 | [Brooklyn Nine Nine](brooklyn-nine-nine.md) | TryHackMe | root |
 | [Bounty Hacker](bounty-hacker.md) | TryHackMe | root |
 | [Simple CTF](simple-ctf.md) | TryHackMe | root |
+| [Ignite](ignite.md) | TryHackMe | root |
