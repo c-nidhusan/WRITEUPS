@@ -87,8 +87,6 @@ exploit landing a shell is the confirmation. *Hypothesis → test → answer key
   "what system is this for?" before use.
 - **Paste corruption twice** (`&gt;&amp;` payloads) — rule written: payloads with `> < & |` get
   hand-typed or staged via HTTP, never pasted from a browser.
-- Jumped to the fallback payload without running the isolation test (echo → /dev/tcp) first —
-  debug one variable at a time.
 - The config-file privesc needed a nudge despite the PHP error literally printing the path.
 
 ## 6. Lessons
