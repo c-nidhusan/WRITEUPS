@@ -13,3 +13,4 @@ One markdown file per machine, named after the room.
 | [Bounty Hacker](bounty-hacker.md) | TryHackMe | root |
 | [Simple CTF](simple-ctf.md) | TryHackMe | root |
 | [Ignite](ignite.md) | TryHackMe | root |
+| [RootMe](rootme.md) | TryHackMe | root |
