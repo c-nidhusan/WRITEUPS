@@ -41,10 +41,13 @@ files inside the webapp for anyone who asks politely. A **file-read primitive**,
 
 ## 3. Foothold (user)
 
-1. **Did:** ran the public Ghostcat exploit; converted it Python 2→3 on the fly:
-   - `socket.makefile(bufsize=0)` → `buffering=0` (self-fixed from the traceback — the Ignite
-     lesson, retained)
-   - `"".join(bytes)` → `b"".join(...).decode("utf-8", errors="replace")` (py3 bytes vs str)
+1. **Did:** ran the public Ghostcat exploit; converted it Python 2→3:
+   - `socket.makefile(bufsize=0)` → `buffering=0` — fix supplied by the mentor (via AI when the
+     mentor was briefly unreachable; announced in the journal). Retrospect: solvable alone.
+   - `"".join(bytes)` → `b"".join(...).decode("utf-8", errors="replace")` (py3 bytes vs str) —
+     fix supplied by the mentor.
+   Status: the py2→3 family is now *seen* twice but not yet retained solo — next vintage
+     exploit, the first traceback gets five solo minutes before any ping.
 
 2. **Did:** `-f WEB-INF/web.xml` — on a Tomcat box, that file is *the* prize. Output contained:
    `skyfuck:8730281lkjlkjdqlksalks` sitting in the app's own description tag.
@@ -99,8 +102,9 @@ the target's artifact, crack offline at home, walk back through the door.
 
 - **Read past the loot:** web.xml printed credentials and the plan went to "upload a shell."
   The recurring attention tax — output first, imagination second.
-- **Guessed before cracking:** manual passphrase attempts before reaching for the john family
-  that solved this exact problem on machine two.
+- **Slow to name the tool:** trying the two known passwords at the prompt was fair triage —
+  the gap was not recognizing the encrypted artifact as a `*2john`-family target right away.
+  Rule: a few manual tries are legal; a locked artifact is john's job from minute one.
 - One brief AI touch on the py2 error while the mentor was unreachable — announced honestly in
   the journal; syntax category, same shelf as `--help`.
 
