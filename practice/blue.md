@@ -69,8 +69,10 @@ Metasploit, first real session: `search ms17-010` → `exploit/windows/smb/ms17_
 
 ## 4. Upgrade to meterpreter (the saga)
 
-Room task: shell → meterpreter via `post/multi/manage/shell_to_meterpreter` (found with
-msfconsole's own `search` — underscores, not hyphens; the tool knows its own contents).
+Room task: shell → meterpreter via `post/multi/manage/shell_to_meterpreter`. The room itself
+says to look the module up; first instinct was the browser (as instructed), then msfconsole's
+own `search` — where the only slip was typing `shell-to-meterpreter`: **module names use
+underscores.**
 
 1. **Did:** two runs with the module's built-in handler → no session. Diagnosis in the output:
    `[*] Stopping exploit/multi/handler` — the temporary listener **tears itself down** before
@@ -82,10 +84,11 @@ msfconsole's own `search` — underscores, not hyphens; the tool knows its own c
    (Second `run -j` failed to bind 4445 — proof the first listener was alive. One listener
    per port.)
 
-3. **The miss:** declared the upgrade dead ~10 seconds after `run`, killed session 1 and the
-   jobs — and `Meterpreter session 2 opened` printed **seconds later, in the same transcript**.
-   Async tools report success in the future tense: check, wait a minute, check again before
-   pronouncing death. The unnecessary EternalBlue re-exploit afterwards was self-inflicted.
+3. **The teardown (mentor's call, not operator error):** after two silent attempts the mentor
+   ordered the cut-losses path — `sessions -K`, `jobs -K`, re-exploit direct — and
+   `Meterpreter session 2 opened` printed **during the teardown**. The upgrade had in fact
+   worked. Playbook lesson (shared responsibility): async tools report success in the future
+   tense — give callbacks a full minute before anyone pronounces death.
 
 4. **Result:** session 2 alive — `meterpreter x64/windows, NT AUTHORITY\SYSTEM`.
 
@@ -95,9 +98,10 @@ msfconsole's own `search` — underscores, not hyphens; the tool knows its own c
    **LM** = crippled legacy half (disabled → the constant `aad3b435…` = "empty");
    **NT** = NTLM (MD4 of the password) — the one that matters.
 
-2. **The miss:** first john run had no `--format` → auto-detected **LM**, attacked the empty
-   half, finished `0g` in one second — and "Session completed" was nearly read as success.
-   **`0g` = zero cracked.** The fix was printed in john's own warning list:
+2. **Did:** first john run had no `--format` → auto-detected **LM**, attacked the empty half,
+   finished in one second. The output was read but not yet *known*: **`0g` = zero guesses
+   cracked** — new verdict-line vocabulary, logged. The fix was printed in john's own warning
+   list:
 
    ```
    john --format=NT -w=rockyou.txt hash.txt   → alqfna22 (Jon), <1s
@@ -117,12 +121,14 @@ msfconsole's own `search` — underscores, not hyphens; the tool knows its own c
 
 ## 6. Misses and dead ends
 
-- **Premature death pronouncement on the async upgrade** → killed session, tore down jobs,
-  re-exploited — the callback landed during the teardown. Wait for async artifacts.
-- **`0g` misread as done** — read the verdict line, not the last line.
+- **Async callback outlived the teardown** (mentor-ordered cut-losses after two silent
+  attempts) — session 2 opened mid-teardown. Playbook: give async artifacts a full minute
+  before abandoning.
+- **`0g` not yet in the vocabulary** — it means zero cracked; output was read, meaning wasn't
+  known. Now logged.
 - **Identical failing commands re-run** (absolute-path `cat`/`cd`) — one variable per retry.
-- **Google before msfconsole `search`** (`shell-to-meterpreter` with hyphens) — the tool in
-  your hands indexes itself; browser second.
+- **Hyphens in `search shell-to-meterpreter`** — module names use underscores. (Browsing first
+  was per the room's instruction, not a miss.)
 - **Metasploit vocabulary by trial** (RHOST vs LHOST, payload vs module) — `show options`
   first, set R/L deliberately.
 
