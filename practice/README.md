@@ -15,3 +15,4 @@ One markdown file per machine, named after the room.
 | [Ignite](ignite.md) | TryHackMe | root |
 | [RootMe](rootme.md) | TryHackMe | root |
 | [tomghost](tomghost.md) | TryHackMe | root |
+| [Blue](blue.md) | TryHackMe | admin (SYSTEM) |
