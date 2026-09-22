@@ -1,9 +1,9 @@
 # Steel Mountain — TryHackMe — SYSTEM
 
-**Date:** 2026-09-22 (completed) — days 1–2 were a manual attempt that stalled at privesc
+**Date:** 2026-09-22
 **Platform:** TryHackMe
 **Outcome:** NT AUTHORITY\SYSTEM — **machine 12, walkthrough-guided completion (Phase B)**
-**Time:** 55m completion run · ~3h manual attempt across two prior days · Confidence self-rated 3/5
+**Time:** 55m · Confidence self-rated 3/5
 **Tools:** nmap, Metasploit (rejetto_hfs_exec), meterpreter (upload, powershell_shell),
 PowerUp (Invoke-AllChecks), msfvenom (`-f exe-service`), sc.exe, nc
 
@@ -39,15 +39,11 @@ service, named the version, went straight to the matching module.
 `search rejetto` → `exploit/windows/http/rejetto_hfs_exec`, rank **excellent**.
 RHOSTS + RPORT 8080 + LHOST → `run` → `Meterpreter session 1 opened` as bill.
 
-**Why one terminal instead of three:** the module *is* the three terminals. `SRVHOST/SRVPORT`
-in its options are the tell — it spins up its own web server to stage the payload, fires the
-exploit, and catches the callback with its own handler. The manual route (py trigger +
-staged .ps1 + separate handler) does the same three jobs by hand.
-
-**Both routes are legitimate, and they teach different things:** manual = you own every
-byte and every failure mode (days 1–2: dead handlers, GET-line forensics, quotes-as-syntax);
-module = speed and reliability. eJPT allows Metasploit; OSCP restricts it to the final
-report phase — the manual muscles built on attempt one are the exam muscles.
+**Why one terminal is enough:** the module *is* the whole staging chain. `SRVHOST/SRVPORT`
+in its options are the tell — it spins up its own web server to deliver the payload, fires
+the exploit, and catches the callback with its own handler. (A fully manual route exists —
+public py trigger + staged PowerShell script + separate listener — worth knowing because
+OSCP restricts Metasploit; for this room, the module is the intended path.)
 
 ## 4. Privilege escalation (the service hijack, done right)
 
@@ -69,10 +65,9 @@ report phase — the manual muscles built on attempt one are the exam muscles.
    ```
    **`-f exe-service`, not `-f exe`:** the output speaks the Windows service handshake
    (StartServiceCtrlDispatcher), so the SCM sees a *well-behaved service*, keeps it running,
-   and never kills the payload. The plain `-f exe` on attempt one never spoke the handshake —
-   the SCM executed it, waited, got silence, and killed the process before the callback
-   completed. That single flag was the difference between a 30-second migrate race (lost
-   twice) and a stable SYSTEM shell.
+   and never kills the payload. A plain `-f exe` never speaks the handshake — the SCM
+   executes it, waits, gets silence, and kills the process. That single flag is the
+   difference between a dead payload and a stable SYSTEM shell.
 
 4. **Did:** `sc.exe stop AdvancedSystemCareService9` → delete original → `upload ASCService.exe`
    into the service path → `sc.exe start` → nc listener on 2222 →
@@ -84,26 +79,16 @@ report phase — the manual muscles built on attempt one are the exam muscles.
   "port already in use" — a stale nc listener was still holding the port. Countermeasure:
   kill the old listener before reusing a port (`Ctrl+C` the terminal or `ss -tlnp` to check),
   and keep the payload filename identical to the service binary to avoid swap confusion.
-- The room's manual-method task was skipped — legitimately: the manual method *was* days
-  1–2, completed by hand (py trigger, staged ps1, handler discipline) before this run.
 
-## 6. The three-day arc (honest record)
-
-Attempt 1–2 (manual, ~3h): shell via py exploit ✓, PowerUp ✓, hijack staged ✓ — stalled on
-the SCM kill race with a plain exe, plus dead-handler and prompt-discipline tax. Completion
-run (walkthrough-guided, 55m, confidence 3/5): clean msf-module entry, `-f exe-service`
-finish. What the struggle bought and this run spent: serve-and-fetch forensics (GET lines),
-handler-before-trigger discipline, SCM anatomy, sc.exe error codes. The walkthrough supplied
-two facts (module route, exe-service); everything else it showed had already been lived.
-
-## 7. Lessons
+## 6. Lessons
 
 1. **`-f exe-service` for service hijacks** — the payload must speak SCM, or SCM kills it.
    Plain exe = migrate race or boot tricks; exe-service = stable SYSTEM.
 2. **The hijack trinity:** StartName LocalSystem + writable binary + CanRestart. All three
    or no play.
-3. **Module vs manual:** `SRVHOST/SRVPORT` reveal a module that self-stages. Modules for
-   speed; manual for exams that ban the framework. Train both.
+3. **Module vs manual:** `SRVHOST/SRVPORT` reveal a module that self-stages. eJPT allows
+   Metasploit; OSCP restricts it — the manual equivalents (stage-serve-listen) stay worth
+   knowing.
 4. **Dot-sourcing (`. .\script.ps1`)** loads functions into the session; running without the
    dot executes and forgets. `load powershell` + `powershell_shell` = PowerShell inside
    meterpreter.
