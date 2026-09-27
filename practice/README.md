@@ -19,3 +19,4 @@ One markdown file per machine, named after the room.
 | [Ice](ice.md) | TryHackMe | admin (SYSTEM) |
 | [Steel Mountain](steel-mountain.md) | TryHackMe | admin (SYSTEM) |
 | [Alfred](alfred.md) | TryHackMe | admin (SYSTEM) |
+| [Agent Sudo](agent-sudo.md) | TryHackMe | root |
