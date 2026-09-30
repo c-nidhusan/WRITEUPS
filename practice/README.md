@@ -21,3 +21,4 @@ One markdown file per machine, named after the room.
 | [Alfred](alfred.md) | TryHackMe | admin (SYSTEM) |
 | [Agent Sudo](agent-sudo.md) | TryHackMe | root |
 | [Skynet](skynet.md) | TryHackMe | root |
+| [Game Zone](gamezone.md) | TryHackMe | root |
