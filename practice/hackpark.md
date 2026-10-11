@@ -86,6 +86,7 @@ writeups. They do now — **the Windows sweep, in order, before any shortcut:**
 
 ```
 whoami  &  whoami /groups          # whose skin am I wearing
+whoami /priv                       # SeImpersonate enabled? → potato family → SYSTEM
 tasklist /svc                      # running processes ↔ services
 sc query state= all                # every service, running or not
 sc qc <name>                       # binPath, user, start mode per service
