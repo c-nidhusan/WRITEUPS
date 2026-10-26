@@ -24,3 +24,4 @@ One markdown file per machine, named after the room.
 | [Game Zone](gamezone.md) | TryHackMe | root |
 | [HackPark](hackpark.md) | TryHackMe | admin (Administrator) |
 | [Relevant](relevant.md) | TryHackMe | root (SYSTEM) |
+| [Internal](internal.md) | TryHackMe | root |
